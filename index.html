@@ -5484,6 +5484,16 @@ function renderPersonalStudentReport(customLogIds = null) {
                 
                 // UBAT HURUF Z: Tukar sebutan "Zee" (Amerika) kepada "Zed" (Malaysia/British)
                 cleanWord = cleanWord.replace(/\bz\b/gi, "zed");
+
+                // UBAT HURUF "A" (SIGHT WORD): Jika bukan Tahap 1, paksa sebutan pendek guna IPA schwa (kalis tanda baca & huruf besar)
+                const currentLevel = document.getElementById('student-level-select')?.value || "3";
+                if (currentLevel !== "1") {
+                    let baseWord = cleanWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim();
+                    if (baseWord.toLowerCase() === "a") {
+                        let punctuation = cleanWord.replace(/[aA]/g, "");
+                        cleanWord = `<phoneme alphabet='ipa' ph='ə'>a</phoneme>` + punctuation;
+                    }
+                }
                 
                 // JEDA KOMA DAN NOKTAH: Tambah arahan berhenti rehat (SSML Break) untuk Google Cloud
                 cleanWord = cleanWord.replace(/,/g, ", <break time='500ms'/>");
@@ -5630,8 +5640,8 @@ function renderPersonalStudentReport(customLogIds = null) {
                 wordToSpeak = "<phoneme alphabet='ipa' ph='də'>the</phoneme>";
             }
 
-            // UBAT "A" (SIGHT WORD): Jika bukan Tahap 1, paksa sebutan 'A' pendek guna IPA schwa
-            if (wordToSpeak.toLowerCase() === "a" && currentLevel !== "1") {
+            // UBAT "A" (SIGHT WORD): Jika bukan Tahap 1, paksa sebutan 'A' pendek guna IPA schwa (tambah trim supaya kalis ralat)
+            if (wordToSpeak.trim().toLowerCase() === "a" && currentLevel !== "1") {
                 wordToSpeak = "<phoneme alphabet='ipa' ph='ə'>a</phoneme>";
             }
 
