@@ -5470,11 +5470,17 @@ function renderPersonalStudentReport(customLogIds = null) {
 
                 cleanWord = cleanWord.replace(/@/g, " at ");
                 
-               // UBAT MASA (a.m / p.m): Buang titik tengah, tapi kekalkan titik akhir untuk jeda ayat
-                cleanWord = cleanWord.replace(/\ba\.m\./gi, "A M.");
-                cleanWord = cleanWord.replace(/\ba\.m\b/gi, "A M");
-                cleanWord = cleanWord.replace(/\bp\.m\./gi, "P M.");
-                cleanWord = cleanWord.replace(/\bp\.m\b/gi, "P M");
+               // UBAT MASA (a.m / p.m): Letak titik pemisah supaya abjad A dan M disebut satu per satu dengan jelas
+                cleanWord = cleanWord.replace(/\ba\.m\./gi, "A. M.");
+                cleanWord = cleanWord.replace(/\ba\.m\b/gi, "A. M.");
+                cleanWord = cleanWord.replace(/\bp\.m\./gi, "P. M.");
+                cleanWord = cleanWord.replace(/\bp\.m\b/gi, "P. M.");
+                
+                // UBAT PERKATAAN KHUSUS (live, lives, tasks)
+                cleanWord = cleanWord.replace(/\blives\b/gi, "livz");
+                cleanWord = cleanWord.replace(/\blive\b/gi, "liv");
+                cleanWord = cleanWord.replace(/\btasks\b/gi, "task"); // bunyikan 's' sekali sahaja
+                // "the" DIBUANG sepenuhnya dari sini supaya ia dibaca menggunakan kecerdasan asli AI yang sangat bagus dalam ayat.
                 
                 // UBAT HURUF Z: Tukar sebutan "Zee" (Amerika) kepada "Zed" (Malaysia/British)
                 cleanWord = cleanWord.replace(/\bz\b/gi, "zed");
@@ -5619,9 +5625,9 @@ function renderPersonalStudentReport(customLogIds = null) {
             // Baca ayat Inggeris (yang tersimpan dalam pembolehubah jawiWord)
             let wordToSpeak = jawiWord;
             
-            // UBAT "THE": Paksa sebutan 'de' (ditulis fonetik thuh) jika diklik secara tunggal
+          // UBAT "THE": Guna kod fonetik saintifik (IPA) untuk paksa ketebalan huruf 'D' dan 'e' pepet (de)
             if (wordToSpeak.toLowerCase() === "the") {
-                wordToSpeak = "de";
+                wordToSpeak = "<phoneme alphabet='ipa' ph='də'>the</phoneme>";
             }
 
             // UBAT "A" (SIGHT WORD): Jika bukan Tahap 1, paksa sebutan 'A' pendek guna IPA schwa
@@ -5629,17 +5635,31 @@ function renderPersonalStudentReport(customLogIds = null) {
                 wordToSpeak = "<phoneme alphabet='ipa' ph='ə'>a</phoneme>";
             }
 
-            // UBAT "LIVE": Paksa sebutan kata kerja 'liv' (bukan laiv/life)
+            // UBAT "LIVE" & "LIVES": Guna ejaan biasa elak suara AI bertukar robot
             if (wordToSpeak.toLowerCase() === "live") {
-                wordToSpeak = "<phoneme alphabet='ipa' ph='lɪv'>live</phoneme>";
+                wordToSpeak = "liv";
+            }
+            if (wordToSpeak.toLowerCase() === "lives") {
+                wordToSpeak = "livz";
             }
 
+            // UBAT "TASKS": Buang 's' di belakang
+            if (wordToSpeak.toLowerCase() === "tasks") {
+                wordToSpeak = "task";
+            }
+
+            // UBAT MASA "A.M" & "P.M": Letak titik pemisah supaya abjad A dan M disebut satu per satu dengan jelas
+            if (wordToSpeak.toLowerCase() === "a.m." || wordToSpeak.toLowerCase() === "a.m") {
+                wordToSpeak = "A. M.";
+            }
+            if (wordToSpeak.toLowerCase() === "p.m." || wordToSpeak.toLowerCase() === "p.m") {
+                wordToSpeak = "P. M.";
+            }
             // Hantar ke enjin suara
             executeCloudTTS([wordToSpeak], speed, false);
             
             setTimeout(() => buttonEl.classList.remove('audio-highlight-active'), 1000);
         }
-
 
         // =====================================================================
         // FUNGSI 2: BACAAN KESELURUHAN AYAT
