@@ -5476,24 +5476,34 @@ function renderPersonalStudentReport(customLogIds = null) {
                 cleanWord = cleanWord.replace(/\bp\.m\./gi, "P. M.");
                 cleanWord = cleanWord.replace(/\bp\.m\b/gi, "P. M.");
                 
-                // UBAT PERKATAAN KHUSUS (live, lives, tasks)
+                    // UBAT PERKATAAN KHUSUS (live, lives, tasks)
                 cleanWord = cleanWord.replace(/\blives\b/gi, "livz");
                 cleanWord = cleanWord.replace(/\blive\b/gi, "liv");
                 cleanWord = cleanWord.replace(/\btasks\b/gi, "task"); // bunyikan 's' sekali sahaja
-                // "the" DIBUANG sepenuhnya dari sini supaya ia dibaca menggunakan kecerdasan asli AI yang sangat bagus dalam ayat.
+                
+                // KENAL PASTI TAHAP SEMASA
+                const currentLevel = document.getElementById('student-level-select')?.value || "3";
+
+                // UBAT "THE": Jika bukan Tahap 1, paksa sebutan pendek guna IPA 'də' (bunyi 'de')
+                if (currentLevel !== "1") {
+                    let baseWord = cleanWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim();
+                    if (baseWord.toLowerCase() === "the") {
+                        let punctuation = cleanWord.replace(/the/gi, "");
+                        cleanWord = `<phoneme alphabet='ipa' ph='də'>the</phoneme>` + punctuation;
+                    }
+                }
                 
                 // UBAT HURUF Z: Tukar sebutan "Zee" (Amerika) kepada "Zed" (Malaysia/British)
                 cleanWord = cleanWord.replace(/\bz\b/gi, "zed");
 
-                // UBAT HURUF "A" (SIGHT WORD): Jika bukan Tahap 1, paksa sebutan pendek guna IPA schwa (kalis tanda baca & huruf besar)
-                const currentLevel = document.getElementById('student-level-select')?.value || "3";
+                 // UBAT HURUF "A" (SIGHT WORD): Jika bukan Tahap 1, paksa sebutan pendek guna IPA schwa (kalis tanda baca & huruf besar)
                 if (currentLevel !== "1") {
                     let baseWord = cleanWord.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim();
                     if (baseWord.toLowerCase() === "a") {
                         let punctuation = cleanWord.replace(/[aA]/g, "");
                         cleanWord = `<phoneme alphabet='ipa' ph='ə'>a</phoneme>` + punctuation;
                     }
-                }
+                } // <--- KUNCI PENYELESAIAN: Kurungan penutup diletakkan di sini!
                 
                 // JEDA KOMA DAN NOKTAH: Tambah arahan berhenti rehat (SSML Break) untuk Google Cloud
                 cleanWord = cleanWord.replace(/,/g, ", <break time='500ms'/>");
@@ -5504,7 +5514,6 @@ function renderPersonalStudentReport(customLogIds = null) {
                 ssml += `<mark name="w${idx}"/>${cleanWord} `;
             });
             ssml += "</speak>";
-
 
              const payload = {
                 input: { ssml: ssml },
@@ -5635,8 +5644,8 @@ function renderPersonalStudentReport(customLogIds = null) {
             // Baca ayat Inggeris (yang tersimpan dalam pembolehubah jawiWord)
             let wordToSpeak = jawiWord;
             
-          // UBAT "THE": Guna kod fonetik saintifik (IPA) untuk paksa ketebalan huruf 'D' dan 'e' pepet (de)
-            if (wordToSpeak.toLowerCase() === "the") {
+          // UBAT "THE": Paksa sebutan 'de' tebal untuk Tahap 2 hingga 6 (Kecuali Tahap 1)
+            if (wordToSpeak.toLowerCase() === "the" && currentLevel !== "1") {
                 wordToSpeak = "<phoneme alphabet='ipa' ph='də'>the</phoneme>";
             }
 
