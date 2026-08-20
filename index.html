@@ -3347,9 +3347,22 @@ function deleteAudioLog(logId, studentIc) {
                 const labelElement = focusText.parentElement.querySelector('span.uppercase');
                 if (labelElement) labelElement.style.display = 'none';
                 
-                focusText.innerHTML = `<div class="text-[10px] text-slate-500 bg-slate-100 p-2 rounded-lg border border-slate-200 text-center mt-2">Anda sedang melihat analisis bagi satu rekod. <button onclick="${returnFunc}" class="text-emerald-600 underline font-bold cursor-pointer hover:text-emerald-800 ml-1">Tunjukkan Keseluruhan</button></div>`;
+                focusText.innerHTML = `<div class="text-[10px] text-slate-500 bg-slate-100 p-2 rounded-lg border border-slate-200 text-center mt-2">Menunjukkan kesalahan khusus bagi sesi pilihan sahaja. <button onclick="${returnFunc}" class="text-emerald-600 underline font-bold cursor-pointer hover:text-emerald-800 ml-1">Tunjukkan Keseluruhan</button></div>`;
             }
 
+            // =================================================================
+            // KOD BAHARU: KEMAS KINI KOTAK SKOR MENGIKUT REKOD YANG DITEKAN
+            // =================================================================
+            const activeScore = log.manualScore !== null ? log.manualScore : log.score;
+            const scoreValEl = document.getElementById(`${prefix}-average-score`);
+            const scoreTitleEl = document.getElementById(`${prefix}-score-title`);
+            const scoreSubtextEl = document.getElementById(`${prefix}-average-subtext`);
+            const trendEl = document.getElementById(`${prefix}-trend-indicator`);
+            
+            if (scoreValEl) scoreValEl.innerText = `${activeScore}%`;
+            if (scoreTitleEl) scoreTitleEl.innerText = `SKOR BACAAN (SESI ${sessionNum || 'AKTIF'})`;
+            if (scoreSubtextEl) scoreSubtextEl.innerText = `Menunjukkan markah bagi topik: ${t ? t.title : 'Pilihan'}`;
+            if (trendEl) trendEl.innerHTML = ""; // Kosongkan trend bila tengok 1 rekod supaya tidak mengelirukan
 
             const activeChart = prefix === 'smrc' ? studentChartInstance : chartInstance;
             if (activeChart && activeChart.data.customIds) {
