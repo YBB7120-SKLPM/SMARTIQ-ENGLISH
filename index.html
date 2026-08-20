@@ -5423,10 +5423,11 @@ function renderPersonalStudentReport(customLogIds = null) {
             let spokenText = text;
             spokenText = spokenText.replace(/\.com/gi, " dot com");
             spokenText = spokenText.replace(/@/g, " at ");
-            spokenText = spokenText.replace(/\ba\.m\./gi, "A M.");
-            spokenText = spokenText.replace(/\ba\.m\b/gi, "A M");
-            spokenText = spokenText.replace(/\bp\.m\./gi, "P M.");
-            spokenText = spokenText.replace(/\bp\.m\b/gi, "P M");
+            spokenText = spokenText.replace(/\ba\.m\./gi, "A.M.");
+            spokenText = spokenText.replace(/\ba\.m\b/gi, "A.M.");
+            spokenText = spokenText.replace(/\bp\.m\./gi, "P.M.");
+            spokenText = spokenText.replace(/\bp\.m\b/gi, "P.M.");
+
             
             const utterance = new SpeechSynthesisUtterance(spokenText);
             utterance.rate = speed;
@@ -5465,17 +5466,18 @@ function renderPersonalStudentReport(customLogIds = null) {
             wordsArray.forEach((word, idx) => {
                 let cleanWord = word.replace(/-/g, ""); // Buang sengkang jika ada
 
-                // UBAT E-MEL (.com dan @): Tukar sebutan sebelum ia menjadi tanda rehat
+                 // UBAT E-MEL (.com dan @): Tukar sebutan sebelum ia menjadi tanda rehat
                 cleanWord = cleanWord.replace(/\.com/gi, " dot com");
 
                 cleanWord = cleanWord.replace(/@/g, " at ");
                 
-               // UBAT MASA (a.m / p.m): Letak titik pemisah supaya abjad A dan M disebut satu per satu dengan jelas
-                cleanWord = cleanWord.replace(/\ba\.m\./gi, "A. M.");
-                cleanWord = cleanWord.replace(/\ba\.m\b/gi, "A. M.");
-                cleanWord = cleanWord.replace(/\bp\.m\./gi, "P. M.");
-                cleanWord = cleanWord.replace(/\bp\.m\b/gi, "P. M.");
-                
+                // UBAT MASA (a.m / p.m): Guna tag SSML 'characters' supaya dibaca abjad tulen (A, M) tanpa jeda titik tengah
+                cleanWord = cleanWord.replace(/\ba\.m\./gi, "<say-as interpret-as='characters'>am</say-as>.");
+                cleanWord = cleanWord.replace(/\ba\.m\b/gi, "<say-as interpret-as='characters'>am</say-as>");
+                cleanWord = cleanWord.replace(/\bp\.m\./gi, "<say-as interpret-as='characters'>pm</say-as>.");
+                cleanWord = cleanWord.replace(/\bp\.m\b/gi, "<say-as interpret-as='characters'>pm</say-as>");
+               
+               
                     // UBAT PERKATAAN KHUSUS (live, lives, tasks)
                 cleanWord = cleanWord.replace(/\blives\b/gi, "livz");
                 cleanWord = cleanWord.replace(/\blive\b/gi, "liv");
@@ -5667,12 +5669,12 @@ function renderPersonalStudentReport(customLogIds = null) {
                 wordToSpeak = "task";
             }
 
-            // UBAT MASA "A.M" & "P.M": Letak titik pemisah supaya abjad A dan M disebut satu per satu dengan jelas
+              // UBAT MASA "A.M" & "P.M": Jarakkan abjad dan buang titik supaya dibaca tepat tanpa rehat
             if (wordToSpeak.toLowerCase() === "a.m." || wordToSpeak.toLowerCase() === "a.m") {
-                wordToSpeak = "A. M.";
+                wordToSpeak = "A M";
             }
             if (wordToSpeak.toLowerCase() === "p.m." || wordToSpeak.toLowerCase() === "p.m") {
-                wordToSpeak = "P. M.";
+                wordToSpeak = "P M";
             }
             // Hantar ke enjin suara
             executeCloudTTS([wordToSpeak], speed, false);
